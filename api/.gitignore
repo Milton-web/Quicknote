@@ -14,7 +14,6 @@ yarn-error.log*
 # OS-filer
 .DS_Store
 Thumbs.db
-PORT=3000
 
-DATABASE_URL=postgresql://user:password@localhost:5432/swingnotes
-JWT_SECRET=CL16Monaco
+
+
