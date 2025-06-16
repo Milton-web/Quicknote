@@ -5,23 +5,42 @@ const pool = require('../db');
 const router = express.Router();
 
 
-// Registrera Användare
-router.post('/signup', async ( req, res ) =>{
-    const {username, password} = req.body;
+// Registrera Användare POST
+router.post('/signup', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
     const hashed = await bcrypt.hash(password, 10);
-    try {
-        const result = await pool.query(
-            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
-            [username, hashed]
-        );
-        const user = result.rows[0];
-        res.status(201).json({ token: generateToken(user) });
-    } catch (err) {
-        res.status(400).json({error : 'Användarnamet är upptaget'});
+
+    // Kontrollera om användaren redan finns
+    const existingUser = await pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: 'Användarnamnet är upptaget' });
     }
+
+    // Skapa användaren
+    const result = await pool.query(
+      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
+      [username, hashed]
+    );
+
+    const user = result.rows[0];
+    res.status(201).json({ token: generateToken(user) });
+
+  } catch (err) {
+    console.error('Fel i /signup:', err);
+    res.status(500).json({
+      error: 'Serverfel',
+      details: err.message,
+    });
+  }
 });
 
-//Logga in
+//Logga in POST
 router.post('/login', async (req, res) => {
     const {username, password} = req.body;
     //Tolka inmatning som string och inte kod
@@ -34,5 +53,6 @@ router.post('/login', async (req, res) => {
 
     res.json({ token: generateToken(user) });
 });
+
 
 module.exports = router; 
