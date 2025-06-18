@@ -56,7 +56,7 @@ router.post('/signup', async (req, res) => {
   try {
     const hashed = await bcrypt.hash(password, 10);
 
-      //kontrollera om användaren finns
+      //kontrollera om användaren finns, förhindrar dubletter
     const existingUser = await pool.query(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -67,7 +67,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Användarnamnet är upptaget' });
     }
 
-    //skapar användaren i databasen
+    //skapar användaren i databasen och skickar ut JWT
     const result = await pool.query(
       'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
       [username, hashed]

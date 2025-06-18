@@ -28,7 +28,7 @@ const options = {
       },
     ],
   },
-  apis: ['./routes/*.js'], // Kommenterade routes
+  apis: ['./routes/*.js'], // Vart dokumentationen ska hämtas
 };
 
 const swaggerSpec = swaggerJsDoc(options);

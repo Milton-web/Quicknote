@@ -5,7 +5,7 @@ function verifyToken(req, res, next) {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(403).json({ error: 'Ingen token' });
+    return res.status(403).json({ error: 'Du måste logga in för att använda denna funktion' });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
