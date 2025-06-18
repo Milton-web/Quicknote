@@ -48,27 +48,34 @@ const router = express.Router();
  *       500:
  *         description: Serverfel
  */
+
+// Registrera användare - POST
 router.post('/signup', async (req, res) => {
   const { username, password } = req.body;
 
   try {
     const hashed = await bcrypt.hash(password, 10);
 
+      //kontrollera om användaren finns
     const existingUser = await pool.query(
       'SELECT * FROM users WHERE username = $1',
       [username]
     );
 
+  
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: 'Användarnamnet är upptaget' });
     }
 
+    //skapar användaren i databasen
     const result = await pool.query(
       'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
       [username, hashed]
     );
 
     const user = result.rows[0];
+
+    //Ger användaren JWT-token 
     res.status(201).json({ token: generateToken(user) });
 
   } catch (err) {
@@ -115,9 +122,12 @@ router.post('/signup', async (req, res) => {
  *       401:
  *         description: Fel användarnamn eller lösenord
  */
+
+//Logga in - POST
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
+  //Hämtar användaren och kommar så att lösenordet stämmer
   const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
   const user = result.rows[0];
 
@@ -125,6 +135,7 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Fel användarnamn eller lösenord' });
   }
 
+  //Ger användaren JWT token 
   res.json({ token: generateToken(user) });
 });
 

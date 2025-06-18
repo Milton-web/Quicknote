@@ -1,7 +1,7 @@
 
 const { Pool } = require('pg');
 
-// Ladda miljövariabler om du använder .env
+// Ladda miljövariabler från .env
 require('dotenv').config();
 
 const pool = new Pool({

@@ -23,6 +23,8 @@ const router = express.Router();
  *       200:
  *         description: Lista av anteckningar
  */
+
+//Hämta anteckningar på användaren - GET
 router.get('/', verifyToken, async (req, res) => {
   const result = await pool.query(
     'SELECT * FROM notes WHERE user_id = $1',
@@ -61,6 +63,8 @@ router.get('/', verifyToken, async (req, res) => {
  *       400:
  *         description: Titel eller text är för lång
  */
+
+//Skapa en anteckning - POST
 router.post('/', verifyToken, async (req, res) => {
   const { title, text } = req.body;
   if (title.length > 50 || text.length > 300) {
@@ -116,6 +120,8 @@ router.post('/', verifyToken, async (req, res) => {
  *       404:
  *         description: Kunde inte hitta anteckningen
  */
+
+//Ändra anteckning - PUT
 router.put('/:id', verifyToken, async (req, res) => {
   const { title, text } = req.body;
   const modifiedAt = new Date();
@@ -139,7 +145,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 
 /**
  * @swagger
- * /api/notes/search:
+ * /api/notes/search?titel=:
  *   get:
  *     summary: Sök efter anteckningar via titel
  *     tags: [Notes]
@@ -156,6 +162,8 @@ router.put('/:id', verifyToken, async (req, res) => {
  *       200:
  *         description: Matchande anteckningar returnerade
  */
+
+//Sök efter anteckning - GET(search?title=)
 router.get('/search', verifyToken, async (req, res) => {
   const { title } = req.query;
   const result = await pool.query(
@@ -186,6 +194,8 @@ router.get('/search', verifyToken, async (req, res) => {
  *       404:
  *         description: Anteckningen kunde inte hittas
  */
+
+//Ta bort anteckning - DELETE
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
