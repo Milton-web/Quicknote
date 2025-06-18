@@ -75,6 +75,7 @@ router.post('/', verifyToken, async (req, res) => {
   const createdAt = new Date();
   const modifiedAt = createdAt;
 
+  //Ser till att ingen kan ta bort någon annans anteckningar
   const result = await pool.query(
     `INSERT INTO notes (id, title, text, createdAt, modifiedAt, user_id)
      VALUES ($1, $2, $3, $4, $5, $6)
@@ -127,6 +128,7 @@ router.put('/:id', verifyToken, async (req, res) => {
   const modifiedAt = new Date();
 
   try {
+    //Visar redigerade anteckning och så man inte ändrar någon annans anteckning
     const result = await pool.query(
       'UPDATE notes SET title = $1, text = $2, modifiedAt = $3 WHERE id = $4 AND user_id = $5 RETURNING *',
       [title, text, modifiedAt, req.params.id, req.user.id]
@@ -166,6 +168,8 @@ router.put('/:id', verifyToken, async (req, res) => {
 //Sök efter anteckning - GET(search?title=)
 router.get('/search', verifyToken, async (req, res) => {
   const { title } = req.query;
+
+  //Gör sökning case-insensitive, ger bara ut inloggad användarens anteckningar
   const result = await pool.query(
     'SELECT * FROM notes WHERE user_id = $1 AND LOWER(title) LIKE LOWER($2)',
     [req.user.id, `%${title}%`]
@@ -204,7 +208,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Anteckningen kunde inte hittas eller tas bort' });
+      return res.status(404).json({ error: 'Anteckningen kunde inte hittas eller har tagits bort' });
     }
 
     res.json({ message: 'Anteckningen har tagits bort', deletedNote: result.rows[0] });
